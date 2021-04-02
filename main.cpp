@@ -1,10 +1,11 @@
 #include <iostream>
 #include <deque>
 #include <optional>
-#include <set>
 #include <string>
+#include <unordered_set>
 #include <variant>
 #include <vector>
+#include "hash_append.h"
 
 using namespace std::literals;
 
@@ -86,17 +87,17 @@ public:
         std::variant<Start, Match, Change, Insert, Delete> variant_;
     };
 
-    using Transforms = std::set<std::pair<SrcPhoneme, DstPhoneme>>;
-
-    explicit Levenshtein(Transforms transforms) :
-            transforms_{std::move(transforms)}
-    {}
+    using Transforms = std::unordered_set<std::pair<SrcPhoneme, DstPhoneme>, xstd::uhash<>>;
 
     struct Result
     {
         std::size_t score;
         std::deque<Operation> operations;
     };
+
+    explicit Levenshtein(Transforms transforms) :
+            transforms_{std::move(transforms)}
+    {}
 
     Result operator()(SrcString const& source, DstString const& destination) const
     {

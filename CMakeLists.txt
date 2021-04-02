@@ -1,6 +1,7 @@
-# cmake_minimum_required(VERSION <specify CMake version here>)
+# cmake_minimum_required(VERSION 3.0)
 project(levenshtein)
 
 set(CMAKE_CXX_STANDARD 17)
 
-add_executable(levenshtein main.cpp)
+include_directories(hash)
+add_executable(levenshtein main.cpp hash/siphash.cpp)
