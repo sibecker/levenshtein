@@ -44,7 +44,7 @@ public:
     using DstString = std::vector<DstPhoneme>;
 
     struct Start {};
-    struct Transform { SrcPhoneme from; DstPhoneme to; };
+    struct Match { SrcPhoneme from; DstPhoneme to; };
     struct Change { SrcPhoneme from; DstPhoneme to; };
     struct Insert { DstPhoneme value; };
     struct Delete { SrcPhoneme value; };
@@ -66,24 +66,24 @@ public:
                 return "Start"s;
             }
 
-            std::string operator()(Transform const &op) const {
-                return "Transform '"s + op.from + "' into '"s + op.to + "'"s;
+            std::string operator()(Match const &op) const {
+                return "Match\t"s + op.from + "\twith\t"s + op.to;
             }
 
             std::string operator()(Change const &op) const {
-                return "Change '"s + op.from + "' into '"s + op.to + "'"s;
+                return "Change\t"s + op.from + "\tinto\t"s + op.to;
             }
 
             std::string operator()(Insert const &op) const {
-                return "Insert '"s +  op.value + "'"s;
+                return "Insert\t\t    \t"s +  op.value;
             }
 
             std::string operator()(Delete const &op) const {
-                return "Delete '"s + op.value + "'"s;
+                return "Delete\t"s + op.value;
             }
         } toString = {};
 
-        std::variant<Start, Transform, Change, Insert, Delete> variant_;
+        std::variant<Start, Match, Change, Insert, Delete> variant_;
     };
 
     using Transforms = std::set<std::pair<SrcPhoneme, DstPhoneme>>;
@@ -92,14 +92,21 @@ public:
             transforms_{std::move(transforms)}
     {}
 
-    std::deque<Operation> operator()(SrcString const& source, DstString const& destination) const
+    struct Result
+    {
+        std::size_t score;
+        std::deque<Operation> operations;
+    };
+
+    Result operator()(SrcString const& source, DstString const& destination) const
     {
         std::deque<Operation> operations;
         auto calculator = Calculator{transforms_, source, destination};
-        for(Node const* node = &calculator.node(source.size(), destination.size()); node != nullptr; node = node->previous)
+        Node const& result = calculator.node(source.size(), destination.size());
+        for(Node const* node = &result; node != nullptr; node = node->previous)
             operations.push_front(node->operation);
 
-        return operations;
+        return {result.score, operations};
     }
 
 private:
@@ -144,7 +151,7 @@ private:
                     if(change_cost) {
                         cache_(i, j) = Node{score, Change{from, to}, &node(i-1,j-1)};
                     } else {
-                        cache_(i, j) = Node{score, Transform{from, to}, &node(i-1,j-1)};
+                        cache_(i, j) = Node{score, Match{from, to}, &node(i-1,j-1)};
                     }
                 } else if (score == ins_dst) {
                     cache_(i, j) = Node{score, Insert{to}, &node(i,j-1)};
@@ -170,7 +177,7 @@ int main() {
         {"zeta", "z"},
         {"eta", "e"},
         {"theta", "th"},
-        {"iota", "i"}, {"iota", "j"},
+        {"iota", "i"},
         {"kappa", "c"}, {"kappa", "k"},
         {"lambda", "l"},
         {"mu", "m"},
@@ -191,13 +198,11 @@ int main() {
     auto const lev = Levenshtein(transforms);
     Levenshtein::SrcString const source = {"alpha", "beta", "gamma", "delta", "epsilon", "zeta", "eta", "theta", "iota", "kappa", "lambda", "mu", "nu", "xi", "omicron", "pi", "rho", "sigma", "tau", "upsilon", "phi", "chi", "psi", "omega"};
     Levenshtein::DstString const destination = {"a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"};
-    auto operations = lev(source, destination);
-    for(const auto& op : operations)
-        std::cout << op << std::endl;
 
-    operations = lev({"epsilon", "lambda", "lambda", "epsilon", "nu", "iota", "kappa", "alpha"}, {"g", "r", "e", "e", "k"});
+    auto const [score, operations] = lev(source, destination);
     for(const auto& op : operations)
         std::cout << op << std::endl;
+    std::cout << std::endl << score << " non-match operations." << std::endl;
 
     return 0;
 }
