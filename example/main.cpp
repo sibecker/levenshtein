@@ -1,7 +1,7 @@
-#include "levenshtein.h"
+#include "levenshtein/levenshtein.h"
 
 int main() {
-    Levenshtein::Transforms const transforms = {
+    levenshtein::Transforms const transforms = {
         {"alpha", "a"},
         {"beta", "b"},
         {"gamma", "g"},
@@ -28,9 +28,9 @@ int main() {
         {"omega", "o"}
     };
 
-    auto const lev = Levenshtein(transforms);
-    Levenshtein::SrcString const source = {"alpha", "beta", "gamma", "delta", "epsilon", "zeta", "eta", "theta", "iota", "kappa", "lambda", "mu", "nu", "xi", "omicron", "pi", "rho", "sigma", "tau", "upsilon", "phi", "chi", "psi", "omega"};
-    Levenshtein::DstString const destination = {"a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"};
+    auto const lev = levenshtein::Levenshtein(transforms);
+    levenshtein::SrcString const source = {"alpha", "beta", "gamma", "delta", "epsilon", "zeta", "eta", "theta", "iota", "kappa", "lambda", "mu", "nu", "xi", "omicron", "pi", "rho", "sigma", "tau", "upsilon", "phi", "chi", "psi", "omega"};
+    levenshtein::DstString const destination = {"a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"};
 
     auto const result = lev(source, destination);
     for(const auto& op : result.operations())
