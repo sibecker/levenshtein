@@ -32,10 +32,11 @@ int main() {
     Levenshtein::SrcString const source = {"alpha", "beta", "gamma", "delta", "epsilon", "zeta", "eta", "theta", "iota", "kappa", "lambda", "mu", "nu", "xi", "omicron", "pi", "rho", "sigma", "tau", "upsilon", "phi", "chi", "psi", "omega"};
     Levenshtein::DstString const destination = {"a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"};
 
-    auto const [score, operations] = lev(source, destination);
-    for(const auto& op : operations)
+    auto const result = lev(source, destination);
+    for(const auto& op : result.operations())
         std::cout << op << std::endl;
-    std::cout << std::endl << score << " non-match operations." << std::endl;
+
+    std::cout << std::endl << result.count() << std::endl;
 
     return 0;
 }

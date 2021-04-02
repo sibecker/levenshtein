@@ -2,6 +2,7 @@
 
 #include <vector>
 
+// A simple matrix class giving 2-part index (row and column) into a data vector.
 template<typename T>
 class Matrix
 {
