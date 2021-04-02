@@ -1,0 +1,4 @@
+[submodule "hash_stream"]
+	path = hash_stream
+	url = https://github.com/sibecker/hash_stream.git
+	branch = main
